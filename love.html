@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>微信爱心</title>
+    <style>
+        body {
+            margin: 0;
+            background: #FFC0CB;
+            overflow: hidden;
+            text-align: center;
+        }
+        .heart {
+            font-size: 100px;
+            animation: beat 0.8s infinite alternate;
+            margin-top: 40vh;
+        }
+        @keyframes beat {
+            to { transform: scale(1.2); }
+        }
+    </style>
+</head>
+<body>
+    <div class="heart">❤️</div>
+    <script>
+        // 微信浏览器兼容代码
+        document.addEventListener('WeixinJSBridgeReady', function() {
+            console.log("微信环境已加载");
+        }, false);
+    </script>
+</body>
+</html>
