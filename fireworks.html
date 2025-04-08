@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>微信烟花特效</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background: #000;
+            touch-action: manipulation;
+        }
+        canvas {
+            display: block;
+        }
+        .instruction {
+            position: fixed;
+            bottom: 20px;
+            width: 100%;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.7);
+            font-family: Arial, sans-serif;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="fireworks"></canvas>
+    <div class="instruction">点击屏幕放烟花</div>
+
+    <script>
+        // 微信浏览器兼容性调整
+        document.addEventListener('WeixinJSBridgeReady', function() {
+            initFireworks();
+        }, false);
+        
+        // 普通浏览器直接初始化
+        window.onload = initFireworks;
+
+        function initFireworks() {
+            const canvas = document.getElementById('fireworks');
+            const ctx = canvas.getContext('2d');
+            
+            // 适配屏幕尺寸
+            function resizeCanvas() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+            window.addEventListener('resize', resizeCanvas);
+            resizeCanvas();
+
+            // 烟花粒子系统
+            class Particle {
+                constructor(x, y, color) {
+                    this.x = x;
+                    this.y = y;
+                    this.color = color;
+                    this.radius = Math.random() * 2 + 1;
+                    this.velocity = {
+                        x: (Math.random() - 0.5) * 8,
+                        y: (Math.random() - 0.5) * 8
+                    };
+                    this.alpha = 1;
+                    this.decay = Math.random() * 0.015 + 0.01;
+                }
+
+                draw() {
+                    ctx.globalAlpha = this.alpha;
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                    ctx.fillStyle = this.color;
+                    ctx.fill();
+                }
+
+                update() {
+                    this.velocity.y += 0.05;
+                    this.x += this.velocity.x;
+                    this.y += this.velocity.y;
+                    this.alpha -= this.decay;
+                    this.draw();
+                    return this.alpha > 0;
+                }
+            }
+
+            let particles = [];
+            const colors = ['#ff0000', '#ffff00', '#00ff00', '#00ffff', '#0000ff', '#ff00ff'];
+
+            // 点击/触摸触发烟花
+            function createFirework(x, y) {
+                const particleCount = 100;
+                for (let i = 0; i < particleCount; i++) {
+                    const color = colors[Math.floor(Math.random() * colors.length)];
+                    particles.push(new Particle(x, y, color));
+                }
+            }
+
+            // 触摸事件兼容（微信浏览器）
+            canvas.addEventListener('touchstart', function(e) {
+                e.preventDefault();
+                const touch = e.touches[0];
+                createFirework(touch.clientX, touch.clientY);
+            });
+
+            // 鼠标点击事件
+            canvas.addEventListener('click', function(e) {
+                createFirework(e.clientX, e.clientY);
+            });
+
+            // 自动随机烟花（可选）
+            function autoFire() {
+                if (Math.random() < 0.03) {
+                    createFirework(
+                        Math.random() * canvas.width,
+                        Math.random() * canvas.height * 0.5
+                    );
+                }
+                setTimeout(autoFire, 300);
+            }
+            autoFire();
+
+            // 动画循环
+            function animate() {
+                requestAnimationFrame(animate);
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                particles = particles.filter(particle => particle.update());
+            }
+            animate();
+        }
+    </script>
+</body>
+</html>
